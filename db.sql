@@ -181,11 +181,13 @@ CREATE TABLE Jobs (
     FOREIGN KEY (CreatedByUserId) REFERENCES AspNetUsers(Id)
 );
 
+drop table Applications
+
 CREATE TABLE Applications (
     Id INT IDENTITY PRIMARY KEY,
     UserId NVARCHAR(450) NOT NULL,
     JobId INT NOT NULL,
-    Status INT NOT NULL,
+    Status nvarchar(50) NOT NULL,
     AppliedAt DATETIME2 DEFAULT GETDATE(),
 
     CONSTRAINT UQ_User_Job UNIQUE(UserId, JobId),

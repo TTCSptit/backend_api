@@ -1,5 +1,6 @@
 using job.Configurations;
 using job.Data;
+using job.Filters;
 using job.Models;
 using job.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,7 +13,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(ops =>
+{
+    ops.Filters.Add<ValidateModelAttribute>();
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
@@ -56,6 +60,10 @@ builder.Services
 builder.Services.AddScoped<IJobService, JobService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICompanyService, CompanyService>();
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
+builder.Services.AddScoped<IProfileService, ProfileService>();
 
 builder.Services.AddSwaggerGen();
 

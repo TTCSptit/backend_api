@@ -1,4 +1,5 @@
-﻿using System;
+﻿using job.Dtos;
+using System;
 using System.Collections.Generic;
 
 namespace job.Models;
@@ -21,15 +22,13 @@ public partial class Job
 
     public int JobType { get; set; }
 
-    public int Status { get; set; }
+    public int Status { get; set; } = 1;
 
     public int CategoryId { get; set; }
 
     public int CompanyId { get; set; }
 
-    public string CreatedByUserId { get; set; } = null!;
-
-    public int ViewsCount { get; set; }
+    public int ViewsCount { get; set; } 
 
     public DateTime CreatedAt { get; set; }
 
@@ -40,6 +39,4 @@ public partial class Job
     public virtual Category Category { get; set; } = null!;
 
     public virtual Company Company { get; set; } = null!;
-
-    public virtual ApplicationUser CreatedByUser { get; set; } = null!;
 }

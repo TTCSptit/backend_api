@@ -2,7 +2,8 @@
 using job.Dtos;
 using job.Models;
 using Microsoft.EntityFrameworkCore;
-using static System.Net.Mime.MediaTypeNames;
+using System.Diagnostics.Eventing.Reader;
+using System.Xml;
 
 namespace job.Services
 {
@@ -133,7 +134,7 @@ namespace job.Services
                 .ToListAsync();
         }
 
-        public async Task<List<ApplicationCardDto>> GetApplications(string userId)
+        public async Task<List<ApplicationCardDto>> GetApplicationsAsync(string userId)
         {
             return await _context.Applications
                 .Include(a => a.Job).ThenInclude(j => j.Company)
@@ -155,6 +156,143 @@ namespace job.Services
                     Status = a.Status,
                     AppliedAt = a.AppliedAt
                 }).ToListAsync();
+        }
+
+        public async Task<bool> ApplyJobAsync(string userId, int jobId)
+        {
+            var application = new Application
+            {
+                JobId = jobId,
+                UserId = userId
+            };
+
+            await _context.Applications.AddAsync(application);
+
+            try
+            {
+                return (await _context.SaveChangesAsync()) > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<EmployerJobOverviewDto?> GetEmployerJobsWithStatsAsync(string userId, string? keyword)
+        {
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.OwnerUserId == userId);
+
+            if (company is null) return null;
+
+            var jobs = _context.Jobs.Where(j => j.CompanyId == company.Id);
+
+            if (!string.IsNullOrEmpty(keyword))
+                jobs = jobs.Where(j => j.Title.ToLower().Contains(keyword.ToLower()));
+
+            var jobList = await jobs
+                .OrderByDescending(j => j.CreatedAt)
+                .Select(j => new EmployerJobItemDto
+                {
+                    Id = j.Id,
+                    Title = j.Title,
+                    Location = j.Location,
+                    SalaryMin = j.SalaryMin,
+                    SalaryMax = j.SalaryMax,
+                    JobType = j.JobType,
+                    IsNegotiable = j.IsNegotiable,
+                    ExpiredAt = j.ExpiredAt,
+                    CandidateCount = _context.Applications.Count(a => a.JobId == j.Id),
+                    ViewCount = j.ViewsCount
+                }).ToListAsync();
+
+            return new EmployerJobOverviewDto
+            {
+                TotalPostedJobs = await _context.Jobs.CountAsync(j => j.CompanyId == company.Id),
+                ActiveJobsCount = await GetJobsAvailable().CountAsync(j => j.CompanyId == company.Id),
+                TotalViews = await _context.Jobs.Where(j => j.CompanyId == company.Id).SumAsync(j => j.ViewsCount),
+                TotalApplications = await _context.Applications.Where(a => a.Job.CompanyId == company.Id).CountAsync(),
+                Jobs = jobList
+            };
+        }
+
+        public async Task<bool> CreateJobAsync(CreateJobDto dto, string userId)
+        {
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.OwnerUserId == userId);
+
+            if (company == null)
+                return false;
+
+            var newJob = new Job
+            {
+                Title = dto.Title,
+                Description = dto.Description,
+                Location = dto.Location,
+                SalaryMin = dto.SalaryMin,
+                SalaryMax = dto.SalaryMax,
+                IsNegotiable = dto.IsNegotiable,
+                JobType = dto.JobType,
+                CategoryId = dto.CategoryId,
+                ExpiredAt = dto.ExpiredAt,
+                CompanyId = company.Id
+            };
+
+            await _context.Jobs.AddAsync(newJob);
+
+            try
+            {
+                return (await _context.SaveChangesAsync()) > 0;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateJobAsync(int id, UpdateJobDto dto, string userId)
+        {
+            var existingJob = await GetJobsAvailable().FirstOrDefaultAsync(j => j.Id == id && j.Company.OwnerUserId == userId);
+
+            if (existingJob is null) return false;
+
+            existingJob.Title = dto.Title;
+            existingJob.Description = dto.Description;
+            existingJob.Location = dto.Location;
+            existingJob.SalaryMin = dto.SalaryMin;
+            existingJob.SalaryMax = dto.SalaryMax;
+            existingJob.IsNegotiable = dto.IsNegotiable;
+            existingJob.JobType = dto.JobType;
+            existingJob.CategoryId = dto.CategoryId;
+            existingJob.ExpiredAt = dto.ExpiredAt;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteJobAsync(int id, string userId)
+        {
+
+            var existingJob = await GetJobsAvailable().FirstOrDefaultAsync(j => j.Id == id && j.Company.OwnerUserId == userId);
+
+            if (existingJob is null) return false;
+
+            try
+            {
+                existingJob.Status = 0;
+                await _context.SaveChangesAsync();
+
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
         }
     }
 }

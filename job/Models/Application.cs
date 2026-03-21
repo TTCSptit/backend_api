@@ -11,7 +11,7 @@ public partial class Application
 
     public int JobId { get; set; }
 
-    public int Status { get; set; }
+    public string Status { get; set; }  = "Pending";
 
     public DateTime AppliedAt { get; set; }
 

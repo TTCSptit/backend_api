@@ -23,7 +23,7 @@ namespace job.Controllers
             return Ok(ApiResponse<List<CategoryCardDto>>.SuccessResponse(categories));
         }
 
-        [HttpGet("Featured")]
+        [HttpGet("featured")]
         public async Task<IActionResult> GetFeaturedCategories([FromQuery] int count = 6, [FromQuery] int days = 30)
         {
             var featured = await _categoryService.GetFeaturedCategories(count, days);
