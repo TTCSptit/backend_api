@@ -11,15 +11,13 @@ public partial class CandidateProfile
 
     public string FullName { get; set; } = null!;
 
-    public string? Title { get; set; }
-
     public string? Phone { get; set; }
+
+    public string? Email { get; set; }
 
     public string? Location { get; set; }
 
     public string? AboutMe { get; set; }
-
-    public string? AvatarUrl { get; set; }
 
     public string? Cvurl { get; set; }
 
