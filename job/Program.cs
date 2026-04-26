@@ -74,6 +74,10 @@ builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 
 builder.Services.AddSwaggerGen();
+
+var app = builder.Build();
+
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
