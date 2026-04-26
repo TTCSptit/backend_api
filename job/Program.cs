@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,7 +17,6 @@ builder.Services.AddControllers(ops =>
     ops.Filters.Add<ValidateModelAttribute>();
 });
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
 
 builder.Services.AddCors(options =>
 {
@@ -80,7 +78,6 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 
-app.MapOpenApi();
 app.UseSwagger();
 app.UseSwaggerUI();
 
