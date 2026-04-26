@@ -32,7 +32,7 @@ namespace job.Controllers
                 .Select(id => new { Id = id, Name = "User " + id })
                 .ToList();
             
-            return Ok(ApiResponse<object>.SuccessResponse(contacts));
+            return Ok(job.Dtos.ApiResponse<object>.SuccessResponse(contacts));
         }
 
         [HttpGet("{contactId}")]
@@ -44,7 +44,7 @@ namespace job.Controllers
                 .OrderBy(m => m.Timestamp)
                 .ToList();
 
-            return Ok(ApiResponse<List<ChatMessage>>.SuccessResponse(messages));
+            return Ok(job.Dtos.ApiResponse<List<ChatMessage>>.SuccessResponse(messages));
         }
 
         [HttpPost]
@@ -60,7 +60,7 @@ namespace job.Controllers
                 Timestamp = DateTime.UtcNow
             };
             _mockMessages.Add(newMessage);
-            return Ok(ApiResponse<ChatMessage>.SuccessResponse(newMessage));
+            return Ok(job.Dtos.ApiResponse<ChatMessage>.SuccessResponse(newMessage));
         }
     }
 

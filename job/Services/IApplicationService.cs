@@ -1,6 +1,5 @@
-﻿using job.Dtos;
-using Microsoft.AspNetCore.Mvc;
 using job.Dtos;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace job.Services
