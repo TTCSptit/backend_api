@@ -16,6 +16,7 @@ builder.Services.AddControllers(ops =>
 {
     ops.Filters.Add<ValidateModelAttribute>();
 });
+builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddCors(options =>
