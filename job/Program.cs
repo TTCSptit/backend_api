@@ -76,7 +76,24 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<JobPtitContext>(); 
+        
+        if (context.Database.GetPendingMigrations().Any())
+        {
+            context.Database.Migrate(); 
+        }
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Lỗi khi tự động tạo database.");
+    }
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();
