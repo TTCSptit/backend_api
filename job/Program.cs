@@ -20,6 +20,16 @@ builder.Services.AddControllers(ops =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 builder.Services.Configure<RoleSettings>(builder.Configuration.GetSection("RoleSettings"));
 builder.Services.AddDbContext<JobPtitContext>(op =>
 {
@@ -77,6 +87,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 // Thứ tự Middleware cực kỳ quan trọng
 app.UseAuthentication();

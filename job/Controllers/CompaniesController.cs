@@ -1,4 +1,4 @@
-﻿using job.Dtos;
+using job.Dtos;
 using job.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +26,21 @@ namespace job.Controllers
 
             if (company is null)
                 return NotFound(ApiResponse<object>.FailureResponse(""));
+            return Ok(ApiResponse<CompanyDetailDto>.SuccessResponse(company));
+        }
+
+        [Authorize(Roles = "recruiter, Recruiter, RECRUITER")]
+        [HttpGet("my-company")]
+        public async Task<IActionResult> GetMyCompany()
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
+
+            var company = await _companyService.GetMyCompanyAsync(currentUserId);
+
+            if (company is null)
+                return NotFound(ApiResponse<object>.FailureResponse("Company not found."));
+
             return Ok(ApiResponse<CompanyDetailDto>.SuccessResponse(company));
         }
 

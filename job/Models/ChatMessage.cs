@@ -1,0 +1,14 @@
+using System;
+
+namespace job.Models
+{
+    public class ChatMessage
+    {
+        public int Id { get; set; }
+        public string SenderId { get; set; } = string.Empty;
+        public string ReceiverId { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public bool IsRead { get; set; } = false;
+    }
+}

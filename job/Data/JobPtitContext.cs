@@ -1,4 +1,4 @@
-﻿using job.Models;
+using job.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -48,4 +48,8 @@ public partial class JobPtitContext : IdentityDbContext<ApplicationUser>
     public virtual DbSet<Skill> Skills { get; set; }
 
     public virtual DbSet<WorkExperience> WorkExperiences { get; set; }
+
+    public virtual DbSet<News> News { get; set; }
+
+    public virtual DbSet<ChatMessage> ChatMessages { get; set; }
 }

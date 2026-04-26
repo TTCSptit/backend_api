@@ -1,4 +1,4 @@
-﻿using job.Data;
+using job.Data;
 using job.Dtos;
 using job.Models;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +43,11 @@ namespace job.Services
             if (filter.CategorySlug is not null)
             {
                 jobs = jobs.Where(j => j.Category.Slug == filter.CategorySlug);
+            }
+
+            if (filter.CompanyId is not null)
+            {
+                jobs = jobs.Where(j => j.CompanyId == filter.CompanyId);
             }
 
             if (filter.JobType is not null)

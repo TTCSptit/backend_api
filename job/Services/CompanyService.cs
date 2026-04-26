@@ -1,4 +1,4 @@
-﻿using job.Data;
+using job.Data;
 using job.Dtos;
 using job.Models;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +31,27 @@ namespace job.Services
                 LogoUrl = existingCompany.LogoUrl,
                 Description = existingCompany.Description,
                 IsVerified = existingCompany.IsVerified,
+            };
+        }
+
+        public async Task<CompanyDetailDto?> GetMyCompanyAsync(string userId)
+        {
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.OwnerUserId == userId);
+
+            if (company is null)
+                return null;
+
+            return new CompanyDetailDto
+            {
+                Id = company.Id,
+                Name = company.Name,
+                Location = company.Location,
+                WebsiteUrl = company.WebsiteUrl,
+                Email = company.Email,
+                PhoneNumber = company.PhoneNumber,
+                LogoUrl = company.LogoUrl,
+                Description = company.Description,
+                IsVerified = company.IsVerified,
             };
         }
 

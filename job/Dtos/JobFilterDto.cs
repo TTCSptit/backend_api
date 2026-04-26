@@ -1,4 +1,4 @@
-﻿namespace job.Dtos
+namespace job.Dtos
 {
     public class JobFilterDto
     {
@@ -8,6 +8,7 @@
         public int? JobType { get; set; }
         public int? MinSalary { get; set; }
         public int? MaxSalary { get; set; }
+        public int? CompanyId { get; set; }
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 12;
     }
