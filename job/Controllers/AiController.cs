@@ -228,7 +228,7 @@ namespace job.Controllers
         /// <summary>
         /// Kết nối WebSocket Proxy cho Chat
         /// </summary>
-        [HttpGet("/ws/chat/{userId}")]
+        [HttpGet("ws/chat/{userId}")]
         public async Task GetWebSocket(string userId)
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
