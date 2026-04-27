@@ -1,4 +1,4 @@
-﻿using job.Dtos;
+using job.Dtos;
 using job.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,7 +30,7 @@ namespace job.Controllers
 
             if (featured == null || !featured.Any())
             {
-                return NotFound(ApiResponse<object>.FailureResponse("No featured categories found for the specified period."));
+                return Ok(ApiResponse<List<FeaturedCategoryCardDto>>.SuccessResponse(new List<FeaturedCategoryCardDto>()));
             }
 
             return Ok(ApiResponse<List<FeaturedCategoryCardDto>>.SuccessResponse(featured));
