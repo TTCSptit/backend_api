@@ -250,6 +250,9 @@ namespace job.Controllers
 
             try
             {
+                // Thêm Origin header để tránh lỗi 403 khi kết nối tới Hugging Face Spaces
+                aiSocket.Options.SetRequestHeader("Origin", "https://kakakaak123-ai-career-advisor.hf.space");
+                
                 await aiSocket.ConnectAsync(aiUri, CancellationToken.None);
 
                 // Task nhận từ AI -> Frontend
