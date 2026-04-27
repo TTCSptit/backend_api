@@ -287,8 +287,10 @@ namespace job.Controllers
                     try
                     {
                         var data = JsonDocument.Parse(messageJson);
-                        var text = data.RootElement.GetProperty("message").GetString();
-                        var sessionId = data.RootElement.TryGetProperty("session_id", out var sid) ? sid.GetString() : "default";
+                        if (data.RootElement.TryGetProperty("message", out var messageProp))
+                        {
+                            var text = messageProp.GetString();
+                            var sessionId = data.RootElement.TryGetProperty("session_id", out var sid) ? sid.GetString() : "default";
 
                         if (!string.IsNullOrEmpty(text))
                         {
@@ -322,7 +324,8 @@ namespace job.Controllers
                             await _context.SaveChangesAsync();
                         }
                     }
-                    catch (Exception ex) { Console.WriteLine("WS Send Log Error: " + ex.Message); }
+                }
+                catch (Exception ex) { Console.WriteLine("WS Send Log Error: " + ex.Message); }
                 }
 
                 await destination.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
@@ -346,29 +349,31 @@ namespace job.Controllers
                     try
                     {
                         var data = JsonDocument.Parse(responseJson);
-                        var type = data.RootElement.GetProperty("type").GetString();
-                        
-                        if (type == "content")
+                        if (data.RootElement.TryGetProperty("type", out var typeProp))
                         {
-                            aiResponseBuffer.Append(data.RootElement.GetProperty("content").GetString());
-                        }
-                        else if (type == "end")
-                        {
-                            var sessionId = data.RootElement.GetProperty("session_id").GetString();
-                            var aiDataJson = data.RootElement.TryGetProperty("data", out var d) ? d.ToString() : null;
-
-                            // Lưu phản hồi của AI vào DB
-                            _context.AiChatMessages.Add(new AiChatMessage
+                            var type = typeProp.GetString();
+                            if (type == "content" && data.RootElement.TryGetProperty("content", out var contentProp))
                             {
-                                UserId = userId,
-                                SessionId = sessionId!,
-                                Role = "ai",
-                                Message = aiResponseBuffer.ToString(),
-                                Timestamp = DateTime.UtcNow,
-                                AiDataJson = aiDataJson
-                            });
-                            await _context.SaveChangesAsync();
-                            aiResponseBuffer.Clear();
+                                aiResponseBuffer.Append(contentProp.GetString());
+                            }
+                            else if (type == "end" && data.RootElement.TryGetProperty("session_id", out var sessionProp))
+                            {
+                                var sessionId = sessionProp.GetString();
+                                var aiDataJson = data.RootElement.TryGetProperty("data", out var d) ? d.ToString() : null;
+
+                                // Lưu phản hồi của AI vào DB
+                                _context.AiChatMessages.Add(new AiChatMessage
+                                {
+                                    UserId = userId,
+                                    SessionId = sessionId!,
+                                    Role = "ai",
+                                    Message = aiResponseBuffer.ToString(),
+                                    Timestamp = DateTime.UtcNow,
+                                    AiDataJson = aiDataJson
+                                });
+                                await _context.SaveChangesAsync();
+                                aiResponseBuffer.Clear();
+                            }
                         }
                     }
                     catch (Exception ex) { Console.WriteLine("WS Receive Log Error: " + ex.Message); }
