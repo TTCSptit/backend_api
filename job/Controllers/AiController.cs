@@ -228,8 +228,8 @@ namespace job.Controllers
         /// <summary>
         /// Kết nối WebSocket Proxy cho Chat
         /// </summary>
-        [HttpGet("ws/chat/{userId}")]
-        public async Task GetWebSocket(string userId)
+        [Route("ws-chat/{userId}")]
+        public async Task ConnectChat(string userId)
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
@@ -245,7 +245,8 @@ namespace job.Controllers
         private async Task HandleAiWebSocketProxy(WebSocket frontendSocket, string userId)
         {
             using var aiSocket = new ClientWebSocket();
-            var aiUri = new Uri($"wss://kakakaak123-ai-career-advisor.hf.space/ws/chat/{userId}");
+            // Thêm /api vào trước /ws để khớp với APIRouter trong Python
+            var aiUri = new Uri($"wss://kakakaak123-ai-career-advisor.hf.space/api/ws/chat/{userId}");
 
             try
             {
