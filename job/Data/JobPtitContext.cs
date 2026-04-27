@@ -121,6 +121,28 @@ public partial class JobPtitContext : IdentityDbContext<ApplicationUser>
         {
             entity.ToTable("ChatMessages");
         });
+
+        builder.Entity<AiChatMessage>(entity =>
+        {
+            entity.ToTable("AiChatMessages");
+            entity.HasIndex(e => e.SessionId);
+            entity.HasIndex(e => e.UserId);
+        });
+
+        builder.Entity<ChatSession>(entity =>
+        {
+            entity.ToTable("ChatSessions");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.User1Id);
+            entity.HasIndex(e => e.User2Id);
+        });
+
+        builder.Entity<AiChatSession>(entity =>
+        {
+            entity.ToTable("AiChatSessions");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.UserId);
+        });
     }
 
     public virtual DbSet<Application> Applications { get; set; }
@@ -133,4 +155,7 @@ public partial class JobPtitContext : IdentityDbContext<ApplicationUser>
     public virtual DbSet<WorkExperience> WorkExperiences { get; set; }
     public virtual DbSet<News> News { get; set; }
     public virtual DbSet<ChatMessage> ChatMessages { get; set; }
+    public virtual DbSet<AiChatMessage> AiChatMessages { get; set; }
+    public virtual DbSet<ChatSession> ChatSessions { get; set; }
+    public virtual DbSet<AiChatSession> AiChatSessions { get; set; }
 }
