@@ -197,7 +197,7 @@ namespace job.Controllers
             fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
             content.Add(fileContent, "cv_file", file.FileName);
 
-            var response = await client.PostAsync($"{_aiServiceUrl}/upload-cv", content);
+            var response = await client.PostAsync($"{_aiServiceUrl}/cv/upload", content);
             var body = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
