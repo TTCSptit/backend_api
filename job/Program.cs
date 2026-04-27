@@ -79,6 +79,21 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Seed Roles
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var roles = new[] { "Candidate", "Recruiter" };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+        {
+            await roleManager.CreateAsync(new IdentityRole(role));
+        }
+    }
+}
+
+
 
 app.UseSwagger();
 app.UseSwaggerUI();
