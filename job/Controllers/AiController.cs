@@ -180,6 +180,33 @@ namespace job.Controllers
         }
 
         /// <summary>
+        /// Proxy Upload CV cho WebSocket flow — parse CV, lưu Redis, trả về cv_id
+        /// </summary>
+        [HttpPost("upload-cv")]
+        public async Task<IActionResult> UploadCvForWs()
+        {
+            if (Request.Form.Files.Count == 0)
+                return BadRequest(new { error = "Không tìm thấy file CV." });
+
+            var client = _httpClientFactory.CreateClient();
+            client.Timeout = TimeSpan.FromMinutes(2);
+
+            var file = Request.Form.Files[0];
+            var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(file.OpenReadStream());
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
+            content.Add(fileContent, "cv_file", file.FileName);
+
+            var response = await client.PostAsync($"{_aiServiceUrl}/upload-cv", content);
+            var body = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+                return Content(body, "application/json");
+
+            return StatusCode((int)response.StatusCode, body);
+        }
+
+        /// <summary>
         /// Proxy lấy dữ liệu kỹ năng cho Radar Chart
         /// </summary>
         [HttpGet("skills/{userId}")]
