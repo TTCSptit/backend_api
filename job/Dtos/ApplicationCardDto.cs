@@ -1,9 +1,10 @@
-﻿namespace job.Dtos
+namespace job.Dtos
 {
     public class ApplicationCardDto
     {
-        public JobCardDto JobCardDto { get; set; }
-        public string Status { get; set; }
+        public int Id { get; set; }
+        public JobCardDto JobCardDto { get; set; } = null!;
+        public string Status { get; set; } = null!;
         public DateTime AppliedAt { get; set; }
     }
 }

@@ -103,6 +103,8 @@ namespace job.Services
 
             return !applications.Any() ? null : await applications.Include(a => a.Job).ThenInclude(j => j.Company).Select(a => new ApplicationCardDto
             {
+                Id = a.Id,
+            {
                 JobCardDto = new JobCardDto
                 {
                     Id = a.JobId,
