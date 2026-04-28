@@ -81,6 +81,7 @@ var app = builder.Build();
 app.UseDeveloperExceptionPage();
 
 // Seed Roles
+/*
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -93,8 +94,7 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
-
-
+*/
 
 app.UseSwagger();
 app.UseSwaggerUI();
