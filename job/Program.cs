@@ -84,10 +84,13 @@ if (app.Environment.IsDevelopment())
     app.UseDeveloperExceptionPage();
 }
 
-// Seed Roles
+// Seed Roles & Auto Migration
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<JobPtitContext>();
+    await context.Database.MigrateAsync();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
     var roles = new[] { "Candidate", "Recruiter" };
     foreach (var role in roles)
     {

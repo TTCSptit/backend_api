@@ -21,8 +21,9 @@ namespace job.Services
             var profile = await _context.Applications
                 .Include(a => a.User)
                 .ThenInclude(u => u.CandidateProfile)
+                .Where(a => a.Id == applicationId)
                 .Select(a => a.User.CandidateProfile)
-                .FirstOrDefaultAsync(a => a.Id == applicationId);
+                .FirstOrDefaultAsync();
 
             if (profile == null || string.IsNullOrEmpty(profile.Cvurl)) return null;
 
