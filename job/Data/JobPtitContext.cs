@@ -158,4 +158,5 @@ public partial class JobPtitContext : IdentityDbContext<ApplicationUser>
     public virtual DbSet<AiChatMessage> AiChatMessages { get; set; }
     public virtual DbSet<ChatSession> ChatSessions { get; set; }
     public virtual DbSet<AiChatSession> AiChatSessions { get; set; }
+    public virtual DbSet<UserResume> UserResumes { get; set; }
 }
