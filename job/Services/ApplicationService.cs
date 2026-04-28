@@ -19,9 +19,9 @@ namespace job.Services
         public async Task<FileResult?> GetApplicantCvAsync(int applicationId)
         {
             var profile = await _context.Applications
+                .Where(a => a.Id == applicationId)
                 .Include(a => a.User)
                 .ThenInclude(u => u.CandidateProfile)
-                .Where(a => a.Id == applicationId)
                 .Select(a => a.User.CandidateProfile)
                 .FirstOrDefaultAsync();
 
@@ -46,7 +46,6 @@ namespace job.Services
 
         public async Task<JobApplicantsDashboardDto?> GetJobApplicantsDashboardAsync(int jobId)
         {
-            // Kiểm tra xem job có tồn tại không
             var jobExists = await _context.Jobs.AnyAsync(j => j.Id == jobId);
             if (!jobExists) return null;
 
@@ -104,7 +103,6 @@ namespace job.Services
             return !applications.Any() ? null : await applications.Include(a => a.Job).ThenInclude(j => j.Company).Select(a => new ApplicationCardDto
             {
                 Id = a.Id,
-            {
                 JobCardDto = new JobCardDto
                 {
                     Id = a.JobId,
