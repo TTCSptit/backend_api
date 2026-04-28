@@ -78,10 +78,13 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-app.UseDeveloperExceptionPage();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
 
 // Seed Roles
-/*
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -94,22 +97,17 @@ using (var scope = app.Services.CreateScope())
         }
     }
 }
-*/
 
 app.UseSwagger();
 app.UseSwaggerUI();
 
-
 app.UseHttpsRedirection();
-
 app.UseCors();
 
-// Thứ tự Middleware cực kỳ quan trọng
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseWebSockets();
-
 app.MapControllers();
 
 app.Run();
