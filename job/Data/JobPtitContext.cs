@@ -44,7 +44,7 @@ public partial class JobPtitContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Application>(entity =>
         {
             entity.ToTable("Applications");
-            entity.HasOne<ApplicationUser>()
+            entity.HasOne(e => e.User)
                   .WithMany()
                   .HasForeignKey(e => e.UserId)
                   .OnDelete(DeleteBehavior.Restrict);

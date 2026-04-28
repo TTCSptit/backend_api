@@ -78,6 +78,7 @@ builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+app.UseDeveloperExceptionPage();
 
 // Seed Roles
 using (var scope = app.Services.CreateScope())
