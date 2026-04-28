@@ -1,4 +1,4 @@
-﻿using job.Models;
+using job.Models;
 
 namespace job.Dtos
 {
@@ -17,6 +17,10 @@ namespace job.Dtos
         public int? SalaryMin { get; set; }
 
         public int? SalaryMax { get; set; }
+
+        public string? Description { get; set; }
+
+        public int CategoryId { get; set; }
 
         public int? JobType { get; set; }
 

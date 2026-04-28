@@ -114,6 +114,10 @@ namespace job.Services
                 Location = job.Location,
                 SalaryMin = job.SalaryMin,
                 SalaryMax = job.SalaryMax,
+                Description = job.Description,
+                CategoryId = job.CategoryId,
+                JobType = job.JobType,
+                IsNegotiable = job.IsNegotiable,
                 ExpiredAt = job.ExpiredAt
             };
         }
@@ -255,7 +259,9 @@ namespace job.Services
 
         public async Task<bool> UpdateJobAsync(int id, UpdateJobDto dto, string userId)
         {
-            var existingJob = await GetJobsAvailable().FirstOrDefaultAsync(j => j.Id == id && j.Company.OwnerUserId == userId);
+            var existingJob = await _context.Jobs
+                .Include(j => j.Company)
+                .FirstOrDefaultAsync(j => j.Id == id && j.Company.OwnerUserId == userId);
 
             if (existingJob is null) return false;
 
@@ -283,7 +289,9 @@ namespace job.Services
         public async Task<bool> DeleteJobAsync(int id, string userId)
         {
 
-            var existingJob = await GetJobsAvailable().FirstOrDefaultAsync(j => j.Id == id && j.Company.OwnerUserId == userId);
+            var existingJob = await _context.Jobs
+                .Include(j => j.Company)
+                .FirstOrDefaultAsync(j => j.Id == id && j.Company.OwnerUserId == userId);
 
             if (existingJob is null) return false;
 
