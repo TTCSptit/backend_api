@@ -1,10 +1,11 @@
-﻿using job.Models;
+using job.Models;
 
 namespace job.Dtos
 {
     public class ApplicantCardDto
     {
         public int Id { get; set; }
+        public string UserId { get; set; } = string.Empty;
 
         public string Status { get; set; }
 

@@ -63,6 +63,7 @@ namespace job.Services
                 .Select(a => new ApplicantCardDto
                 {
                     Id = a.Id,
+                    UserId = a.UserId,
                     Status = a.Status,
                     AppliedAt = a.AppliedAt,
                     FullName = a.User.CandidateProfile != null ? a.User.CandidateProfile.FullName : (a.User.FullName ?? "N/A"),
