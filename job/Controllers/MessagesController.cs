@@ -1,12 +1,11 @@
-// DEBUG: Updated by AI - Fixed ApiResponse reference
+// DEBUG: Updated by AI - Fixed Persistence by using DB instead of Mock
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using job.Models;
 using job.Dtos;
+using job.Data;
 using System.Security.Claims;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace job.Controllers
 {
@@ -15,53 +14,82 @@ namespace job.Controllers
     [ApiController]
     public class MessagesController : ControllerBase
     {
-        private static readonly List<ChatMessage> _mockMessages = new List<ChatMessage>
+        private readonly JobPtitContext _context;
+
+        public MessagesController(JobPtitContext context)
         {
-            new ChatMessage { Id = 1, SenderId = "recruiter1", ReceiverId = "candidate1", Message = "Chào bạn, mình thấy hồ sơ của bạn rất ấn tượng!", Timestamp = DateTime.UtcNow.AddHours(-2) },
-            new ChatMessage { Id = 2, SenderId = "candidate1", ReceiverId = "recruiter1", Message = "Dạ em chào anh, em cảm ơn anh đã quan tâm ạ.", Timestamp = DateTime.UtcNow.AddHours(-1) }
-        };
+            _context = context;
+        }
 
         [HttpGet("conversations")]
         public async Task<IActionResult> GetConversations()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // Return unique contacts
-            var contacts = _mockMessages
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            // Lấy ID của những người đã nhắn tin với user hiện tại
+            var contactIds = await _context.ChatMessages
                 .Where(m => m.SenderId == userId || m.ReceiverId == userId)
                 .Select(m => m.SenderId == userId ? m.ReceiverId : m.SenderId)
                 .Distinct()
-                .Select(id => new { Id = id, Name = "User " + id })
-                .ToList();
+                .ToListAsync();
+
+            // Lấy thông tin chi tiết (tên) của các contact đó
+            var contacts = await _context.Users
+                .Where(u => contactIds.Contains(u.Id))
+                .Select(u => new { 
+                    Id = u.Id, 
+                    Name = u.FullName ?? u.UserName ?? "Người dùng",
+                    LastMessage = _context.ChatMessages
+                        .Where(m => (m.SenderId == userId && m.ReceiverId == u.Id) || (m.SenderId == u.Id && m.ReceiverId == userId))
+                        .OrderByDescending(m => m.Timestamp)
+                        .Select(m => m.Message)
+                        .FirstOrDefault(),
+                    Time = _context.ChatMessages
+                        .Where(m => (m.SenderId == userId && m.ReceiverId == u.Id) || (m.SenderId == u.Id && m.ReceiverId == userId))
+                        .OrderByDescending(m => m.Timestamp)
+                        .Select(m => m.Timestamp)
+                        .FirstOrDefault()
+                })
+                .OrderByDescending(c => c.Time)
+                .ToListAsync();
             
-            return Ok(job.Dtos.ApiResponse<object>.SuccessResponse(contacts));
+            return Ok(ApiResponse<object>.SuccessResponse(contacts));
         }
 
         [HttpGet("{contactId}")]
         public async Task<IActionResult> GetMessages(string contactId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var messages = _mockMessages
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var messages = await _context.ChatMessages
                 .Where(m => (m.SenderId == userId && m.ReceiverId == contactId) || (m.SenderId == contactId && m.ReceiverId == userId))
                 .OrderBy(m => m.Timestamp)
-                .ToList();
+                .ToListAsync();
 
-            return Ok(job.Dtos.ApiResponse<List<ChatMessage>>.SuccessResponse(messages));
+            return Ok(ApiResponse<List<ChatMessage>>.SuccessResponse(messages));
         }
 
         [HttpPost]
         public async Task<IActionResult> SendMessage([FromBody] SendMessageDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
             var newMessage = new ChatMessage
             {
-                Id = _mockMessages.Count + 1,
                 SenderId = userId,
                 ReceiverId = dto.ReceiverId,
                 Message = dto.Message,
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow,
+                IsRead = false
             };
-            _mockMessages.Add(newMessage);
-            return Ok(job.Dtos.ApiResponse<ChatMessage>.SuccessResponse(newMessage));
+
+            _context.ChatMessages.Add(newMessage);
+            await _context.SaveChangesAsync();
+
+            return Ok(ApiResponse<ChatMessage>.SuccessResponse(newMessage));
         }
     }
 
@@ -70,3 +98,4 @@ namespace job.Controllers
         public string Message { get; set; } = string.Empty;
     }
 }
+

@@ -1,4 +1,4 @@
-﻿using job.Data;
+using job.Data;
 using job.Dtos;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,7 +20,9 @@ namespace job.Services
                 .Where(c => (keyword == null || c.Name.Contains(keyword)))
                 .Select(c => new CategoryCardDto
                 {
+                    Id = c.Id,
                     Name = c.Name,
+                    Slug = c.Slug,
                     TotalJobs = c.Jobs.Count(j => j.Status == 1)
                 }).ToListAsync();
         }
@@ -32,7 +34,9 @@ namespace job.Services
             return await _context.Categories
                 .Select(c => new FeaturedCategoryCardDto
                 {
+                    Id = c.Id,
                     Name = c.Name,
+                    Slug = c.Slug,
                     TotalJobs = c.Jobs.Count(j => j.Status == 1),
 
                     Growth = c.Jobs.Count(j => j.CreatedAt >= growthThreshold && j.Status == 1)
