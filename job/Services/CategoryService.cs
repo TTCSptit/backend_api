@@ -29,76 +29,84 @@ namespace job.Services
 
         public async Task<List<FeaturedCategoryCardDto>> GetFeaturedCategories(int count = 6, int days = 30)
         {
-            var growthThreshold = DateTime.UtcNow.AddDays(-days);
-            var allSkills = await _context.Skills.Select(s => s.Name).ToListAsync();
-
-            // Step 1: Fetch basic category data
-            var categoriesData = await _context.Categories
-                .Select(c => new
-                {
-                    c.Id,
-                    c.Name,
-                    c.Slug,
-                    TotalJobs = c.Jobs.Count(j => j.Status == 1)
-                })
-                .OrderByDescending(c => c.TotalJobs)
-                .Take(count)
-                .ToListAsync();
-
-            var categoryIds = categoriesData.Select(c => c.Id).ToList();
-
-            // Step 2: Fetch all relevant jobs for these categories to calculate stats in-memory
-            var allJobs = await _context.Jobs
-                .Where(j => categoryIds.Contains(j.CategoryId) && j.Status == 1)
-                .Select(j => new
-                {
-                    j.CategoryId,
-                    j.SalaryMin,
-                    j.SalaryMax,
-                    j.CreatedAt,
-                    AppCount = j.Applications.Count,
-                    SearchText = (j.Title + " " + (j.Description ?? "")).ToLower()
-                })
-                .ToListAsync();
-
-            var lowerSkills = allSkills.Select(s => s.ToLower()).ToList();
-            var results = new List<FeaturedCategoryCardDto>();
-
-            foreach (var cat in categoriesData)
+            try
             {
-                var catJobs = allJobs.Where(j => j.CategoryId == cat.Id).ToList();
-                
-                var dto = new FeaturedCategoryCardDto
-                {
-                    Id = cat.Id,
-                    Name = cat.Name,
-                    Slug = cat.Slug,
-                    TotalJobs = cat.TotalJobs,
-                    Growth = catJobs.Count(j => j.CreatedAt >= growthThreshold),
-                    SalaryMin = catJobs.Any(j => j.SalaryMin.HasValue) ? (decimal)catJobs.Where(j => j.SalaryMin.HasValue).Average(j => j.SalaryMin.Value) : 0,
-                    SalaryMax = catJobs.Any(j => j.SalaryMax.HasValue) ? (decimal)catJobs.Where(j => j.SalaryMax.HasValue).Average(j => j.SalaryMax.Value) : 0,
-                    CompetitionRatio = catJobs.Any() ? catJobs.Average(j => (double)j.AppCount) : 0
-                };
+                var growthThreshold = DateTime.UtcNow.AddDays(-days);
+                var allSkills = await _context.Skills.Select(s => s.Name).ToListAsync();
 
-                // Skill extraction
-                var combinedText = string.Join(" ", catJobs.Select(j => j.SearchText));
-                if (!string.IsNullOrEmpty(combinedText))
+                // Step 1: Fetch basic category data
+                var categoriesData = await _context.Categories
+                    .Select(c => new
+                    {
+                        c.Id,
+                        c.Name,
+                        c.Slug,
+                        TotalJobs = c.Jobs.Count(j => j.Status == 1)
+                    })
+                    .OrderByDescending(c => c.TotalJobs)
+                    .Take(count)
+                    .ToListAsync();
+
+                var categoryIds = categoriesData.Select(c => c.Id).ToList();
+
+                // Step 2: Fetch all relevant jobs for these categories to calculate stats in-memory
+                var allJobs = await _context.Jobs
+                    .Where(j => categoryIds.Contains(j.CategoryId) && j.Status == 1)
+                    .Select(j => new
+                    {
+                        j.CategoryId,
+                        j.SalaryMin,
+                        j.SalaryMax,
+                        j.CreatedAt,
+                        AppCount = j.Applications.Count,
+                        SearchText = (j.Title + " " + (j.Description ?? "")).ToLower()
+                    })
+                    .ToListAsync();
+
+                var lowerSkills = allSkills.Select(s => s.ToLower()).ToList();
+                var results = new List<FeaturedCategoryCardDto>();
+
+                foreach (var cat in categoriesData)
                 {
-                    dto.TopSkills = allSkills
-                        .Zip(lowerSkills, (name, lower) => new { Name = name, Lower = lower })
-                        .Where(x => combinedText.Contains(x.Lower))
-                        .Take(3)
-                        .Select(x => x.Name)
-                        .ToList();
+                    var catJobs = allJobs.Where(j => j.CategoryId == cat.Id).ToList();
+                    
+                    var dto = new FeaturedCategoryCardDto
+                    {
+                        Id = cat.Id,
+                        Name = cat.Name,
+                        Slug = cat.Slug,
+                        TotalJobs = cat.TotalJobs,
+                        Growth = catJobs.Count(j => j.CreatedAt >= growthThreshold),
+                        SalaryMin = catJobs.Any(j => j.SalaryMin.HasValue) ? (decimal)catJobs.Where(j => j.SalaryMin.HasValue).Average(j => j.SalaryMin.Value) : 0,
+                        SalaryMax = catJobs.Any(j => j.SalaryMax.HasValue) ? (decimal)catJobs.Where(j => j.SalaryMax.HasValue).Average(j => j.SalaryMax.Value) : 0,
+                        CompetitionRatio = catJobs.Any() ? catJobs.Average(j => (double)j.AppCount) : 0
+                    };
+
+                    // Skill extraction
+                    var combinedText = string.Join(" ", catJobs.Select(j => j.SearchText));
+                    if (!string.IsNullOrEmpty(combinedText))
+                    {
+                        dto.TopSkills = allSkills
+                            .Zip(lowerSkills, (name, lower) => new { Name = name, Lower = lower })
+                            .Where(x => combinedText.Contains(x.Lower))
+                            .Take(3)
+                            .Select(x => x.Name)
+                            .ToList();
+                    }
+
+                    if (dto.TopSkills == null || !dto.TopSkills.Any())
+                        dto.TopSkills = new List<string> { "General", "Communication" };
+
+                    results.Add(dto);
                 }
 
-                if (dto.TopSkills == null || !dto.TopSkills.Any())
-                    dto.TopSkills = new List<string> { "General", "Communication" };
-
-                results.Add(dto);
+                return results;
             }
-
-            return results;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetFeaturedCategories Error]: {ex.Message}");
+                return new List<FeaturedCategoryCardDto>();
+            }
         }
     }
 }
