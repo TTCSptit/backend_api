@@ -9,7 +9,7 @@ namespace job.Dtos
         public string Title { get; set; }
 
         public string CompanyName { get; set; }
-
+        public int CompanyId { get; set; }
         public string CompanyLogoUrl { get; set; }
 
         public string Location { get; set; }
