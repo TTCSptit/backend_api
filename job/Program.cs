@@ -101,11 +101,12 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.UseCors();
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
-app.UseCors();
+// app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
