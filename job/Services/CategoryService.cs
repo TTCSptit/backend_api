@@ -52,23 +52,36 @@ namespace job.Services
                 .Take(count)
                 .ToListAsync();
 
-            // Populate TopSkills by analyzing descriptions (simplified approach)
+            // Optimized skill extraction
+            var lowerSkills = allSkills.Select(s => s.ToLower()).ToList();
+            var categoryIds = categories.Select(c => c.Id).ToList();
+            
+            var allCategoryJobs = await _context.Jobs
+                .Where(j => categoryIds.Contains(j.CategoryId) && j.Status == 1)
+                .Select(j => new { j.CategoryId, Text = (j.Title + " " + (j.Description ?? "")).ToLower() })
+                .ToListAsync();
+
             foreach (var cat in categories)
             {
-                var categoryJobs = await _context.Jobs
-                    .Where(j => j.CategoryId == cat.Id && j.Status == 1)
-                    .Select(j => (j.Title + " " + (j.Description ?? "")).ToLower())
-                    .ToListAsync();
+                var combinedText = string.Join(" ", allCategoryJobs
+                    .Where(j => j.CategoryId == cat.Id)
+                    .Select(j => j.Text));
 
-                var skillCounts = allSkills
-                    .Select(skill => new { Skill = skill, Count = categoryJobs.Count(j => j.Contains(skill.ToLower())) })
-                    .Where(x => x.Count > 0)
-                    .OrderByDescending(x => x.Count)
+                if (string.IsNullOrEmpty(combinedText))
+                {
+                    cat.TopSkills = new List<string> { "General", "Communication" };
+                    continue;
+                }
+
+                cat.TopSkills = allSkills
+                    .Zip(lowerSkills, (name, lower) => new { Name = name, Lower = lower })
+                    .Where(x => combinedText.Contains(x.Lower))
                     .Take(3)
-                    .Select(x => x.Skill)
+                    .Select(x => x.Name)
                     .ToList();
 
-                cat.TopSkills = skillCounts.Any() ? skillCounts : new List<string> { "General", "Communication" };
+                if (!cat.TopSkills.Any())
+                    cat.TopSkills = new List<string> { "General", "Communication" };
             }
 
             return categories;
