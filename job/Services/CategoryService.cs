@@ -42,11 +42,9 @@ namespace job.Services
                     Slug = c.Slug,
                     TotalJobs = c.Jobs.Count(j => j.Status == 1),
                     Growth = c.Jobs.Count(j => j.CreatedAt >= growthThreshold && j.Status == 1),
-                    SalaryMin = c.Jobs.Any(j => j.Status == 1) ? (decimal?)c.Jobs.Where(j => j.Status == 1).Average(j => j.SalaryMin) : 0,
-                    SalaryMax = c.Jobs.Any(j => j.Status == 1) ? (decimal?)c.Jobs.Where(j => j.Status == 1).Average(j => j.SalaryMax) : 0,
-                    CompetitionRatio = c.Jobs.Any(j => j.Status == 1) 
-                        ? (double)c.Jobs.Where(j => j.Status == 1).Sum(j => j.Applications != null ? j.Applications.Count : 0) / c.Jobs.Count(j => j.Status == 1)
-                        : 0
+                    SalaryMin = c.Jobs.Where(j => j.Status == 1).Select(j => (decimal?)j.SalaryMin).Average() ?? 0,
+                    SalaryMax = c.Jobs.Where(j => j.Status == 1).Select(j => (decimal?)j.SalaryMax).Average() ?? 0,
+                    CompetitionRatio = c.Jobs.Where(j => j.Status == 1).Select(j => (double?)j.Applications.Count).Average() ?? 0
                 })
                 .OrderByDescending(c => c.TotalJobs)
                 .Take(count)
