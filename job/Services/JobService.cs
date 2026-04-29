@@ -45,6 +45,11 @@ namespace job.Services
                 jobs = jobs.Where(j => j.Category.Slug == filter.CategorySlug);
             }
 
+            if (filter.CategoryName is not null)
+            {
+                jobs = jobs.Where(j => j.Category.Name == filter.CategoryName);
+            }
+
             if (filter.CompanyId is not null)
             {
                 jobs = jobs.Where(j => j.CompanyId == filter.CompanyId);

@@ -4,6 +4,7 @@ namespace job.Dtos
     {
         public string? Keyword { get; set; }
         public string? Location { get; set; }
+        public string? CategoryName { get; set; }
         public string? CategorySlug { get; set; }
         public int? JobType { get; set; }
         public int? MinSalary { get; set; }

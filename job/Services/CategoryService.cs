@@ -23,7 +23,7 @@ namespace job.Services
                     Id = c.Id,
                     Name = c.Name,
                     Slug = c.Slug,
-                    TotalJobs = c.Jobs.Count(j => j.Status == 1)
+                    TotalJobs = c.Jobs.Count(j => (j.ExpiredAt == null || j.ExpiredAt > DateTime.UtcNow) && j.Status == 1)
                 }).ToListAsync();
         }
 
