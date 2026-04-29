@@ -9,5 +9,7 @@ namespace job.Dtos
         public int Growth { get; set; }
         public decimal? SalaryMin { get; set; }
         public decimal? SalaryMax { get; set; }
+        public List<string> TopSkills { get; set; } = new();
+        public double CompetitionRatio { get; set; }
     }
 }
