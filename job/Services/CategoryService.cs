@@ -39,8 +39,8 @@ namespace job.Services
                     Slug = c.Slug,
                     TotalJobs = c.Jobs.Count(j => j.Status == 1),
                     Growth = c.Jobs.Count(j => j.CreatedAt >= growthThreshold && j.Status == 1),
-                    SalaryMin = c.Jobs.Where(j => j.Status == 1).Average(j => j.SalaryMin),
-                    SalaryMax = c.Jobs.Where(j => j.Status == 1).Average(j => j.SalaryMax)
+                    SalaryMin = (decimal?)c.Jobs.Where(j => j.Status == 1).Average(j => j.SalaryMin),
+                    SalaryMax = (decimal?)c.Jobs.Where(j => j.Status == 1).Average(j => j.SalaryMax)
                 })
                 .OrderByDescending(c => c.TotalJobs)
                 .Take(count)
