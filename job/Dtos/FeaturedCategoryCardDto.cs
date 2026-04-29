@@ -7,5 +7,7 @@ namespace job.Dtos
         public string Slug { get; set; } = null!;
         public int TotalJobs { get; set; }
         public int Growth { get; set; }
+        public decimal? SalaryMin { get; set; }
+        public decimal? SalaryMax { get; set; }
     }
 }
