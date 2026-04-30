@@ -364,6 +364,7 @@ namespace job.Controllers
             var buffer = new byte[1024 * 4];
             var aiResponseBuffer = new StringBuilder();
             var lastSessionId = "default";
+            string? currentAiDataJson = null;
 
             while (source.State == WebSocketState.Open && destination.State == WebSocketState.Open)
             {
@@ -376,6 +377,15 @@ namespace job.Controllers
                     try
                     {
                         var data = JsonDocument.Parse(responseJson);
+                        
+                        // Thu thập dữ liệu AI nếu có trong bất kỳ tin nhắn nào
+                        if (data.RootElement.TryGetProperty("data", out var d)) {
+                            currentAiDataJson = d.ToString();
+                        }
+                        else if (data.RootElement.TryGetProperty("ai_data_json", out var adj)) {
+                            currentAiDataJson = adj.ToString();
+                        }
+
                         if (data.RootElement.TryGetProperty("type", out var typeProp))
                         {
                             var type = typeProp.GetString();
@@ -386,7 +396,11 @@ namespace job.Controllers
                             else if (type == "end" && data.RootElement.TryGetProperty("session_id", out var sessionProp))
                             {
                                 var sessionId = sessionProp.GetString();
-                                var aiDataJson = data.RootElement.TryGetProperty("data", out var d) ? d.ToString() : null;
+                                
+                                // Nếu trong tin nhắn end có data mới thì lấy, không thì dùng cái đã thu thập được
+                                if (data.RootElement.TryGetProperty("data", out var endData)) {
+                                    currentAiDataJson = endData.ToString();
+                                }
 
                                 // Lưu phản hồi của AI vào DB
                                 _context.AiChatMessages.Add(new AiChatMessage
@@ -396,10 +410,13 @@ namespace job.Controllers
                                     Role = "ai",
                                     Message = aiResponseBuffer.ToString(),
                                     Timestamp = DateTime.UtcNow,
-                                    AiDataJson = aiDataJson
+                                    AiDataJson = currentAiDataJson
                                 });
                                 await _context.SaveChangesAsync();
+                                
+                                // Reset cho lượt tiếp theo nếu cần (thường mỗi kết nối WS là 1 flow)
                                 aiResponseBuffer.Clear();
+                                currentAiDataJson = null;
                             }
                         }
                     }
