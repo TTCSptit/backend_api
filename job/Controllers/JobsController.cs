@@ -1,4 +1,4 @@
-﻿using job.Dtos;
+using job.Dtos;
 using job.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -26,12 +26,6 @@ namespace job.Controllers
         public async Task<IActionResult> GetJobs([FromQuery] JobFilterDto dto)
         {
             var result = await _jobService.GetJobCardsAsync(dto);
-
-            if (result.TotalCount == 0)
-            {
-                return NotFound(ApiResponse<object>.FailureResponse("No jobs found matching your criteria."));
-            }
-
             return Ok(ApiResponse<PagedResult<JobCardDto>>.SuccessResponse(result));
         }
 

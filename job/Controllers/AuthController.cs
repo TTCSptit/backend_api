@@ -1,4 +1,4 @@
-﻿using Azure.Core;
+using Azure.Core;
 using Google.Apis.Auth;
 using job.Configurations;
 using job.Dtos;
@@ -56,7 +56,7 @@ namespace job.Controllers
                     return Ok(ApiResponse<object>.SuccessResponse(new
                     {
                         Token = _tokenService.CreateJwt(user, dto.Role),
-                        User = new { user.Email, user.UserName },
+                        User = new { user.Id, user.Email, user.UserName, user.FullName },
                     }, "Login successfully"));
                 }
                 else

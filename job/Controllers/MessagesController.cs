@@ -1,4 +1,3 @@
-// DEBUG: Updated by AI - Fixed Persistence by using DB instead of Mock
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using job.Models;
@@ -34,12 +33,13 @@ namespace job.Controllers
                 .Distinct()
                 .ToListAsync();
 
-            // Lấy thông tin chi tiết (tên) của các contact đó
+            // Lấy thông tin chi tiết (tên, email) của các contact đó
             var contacts = await _context.Users
                 .Where(u => contactIds.Contains(u.Id))
-                .Select(u => new { 
-                    Id = u.Id, 
+                .Select(u => new {
+                    Id = u.Id,
                     Name = u.FullName ?? u.UserName ?? "Người dùng",
+                    Email = u.Email,
                     LastMessage = _context.ChatMessages
                         .Where(m => (m.SenderId == userId && m.ReceiverId == u.Id) || (m.SenderId == u.Id && m.ReceiverId == userId))
                         .OrderByDescending(m => m.Timestamp)
@@ -53,7 +53,7 @@ namespace job.Controllers
                 })
                 .OrderByDescending(c => c.Time)
                 .ToListAsync();
-            
+
             return Ok(ApiResponse<object>.SuccessResponse(contacts));
         }
 
@@ -64,11 +64,26 @@ namespace job.Controllers
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
 
             var messages = await _context.ChatMessages
-                .Where(m => (m.SenderId == userId && m.ReceiverId == contactId) || (m.SenderId == contactId && m.ReceiverId == userId))
+                .Where(m => (m.SenderId == userId && m.ReceiverId == contactId) ||
+                            (m.SenderId == contactId && m.ReceiverId == userId))
                 .OrderBy(m => m.Timestamp)
+                .Join(_context.Users,
+                      m => m.SenderId,
+                      u => u.Id,
+                      (m, u) => new ChatMessageDto
+                      {
+                          Id = m.Id,
+                          SenderId = m.SenderId,
+                          SenderEmail = u.Email ?? string.Empty,
+                          SenderName = u.FullName ?? u.UserName ?? "Người dùng",
+                          ReceiverId = m.ReceiverId,
+                          Message = m.Message,
+                          Timestamp = m.Timestamp,
+                          IsRead = m.IsRead
+                      })
                 .ToListAsync();
 
-            return Ok(ApiResponse<List<ChatMessage>>.SuccessResponse(messages));
+            return Ok(ApiResponse<List<ChatMessageDto>>.SuccessResponse(messages));
         }
 
         [HttpPost]
@@ -76,6 +91,9 @@ namespace job.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var sender = await _context.Users.FindAsync(userId);
+            if (sender == null) return Unauthorized();
 
             var newMessage = new ChatMessage
             {
@@ -89,13 +107,26 @@ namespace job.Controllers
             _context.ChatMessages.Add(newMessage);
             await _context.SaveChangesAsync();
 
-            return Ok(ApiResponse<ChatMessage>.SuccessResponse(newMessage));
+            // Trả về DTO đầy đủ thay vì model thô
+            var responseDto = new ChatMessageDto
+            {
+                Id = newMessage.Id,
+                SenderId = newMessage.SenderId,
+                SenderEmail = sender.Email ?? string.Empty,
+                SenderName = sender.FullName ?? sender.UserName ?? "Người dùng",
+                ReceiverId = newMessage.ReceiverId,
+                Message = newMessage.Message,
+                Timestamp = newMessage.Timestamp,
+                IsRead = newMessage.IsRead
+            };
+
+            return Ok(ApiResponse<ChatMessageDto>.SuccessResponse(responseDto));
         }
     }
 
-    public class SendMessageDto {
+    public class SendMessageDto
+    {
         public string ReceiverId { get; set; } = string.Empty;
         public string Message { get; set; } = string.Empty;
     }
 }
-
