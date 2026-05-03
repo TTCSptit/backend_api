@@ -233,6 +233,65 @@ namespace job.Services
             };
         }
 
+        public async Task<RecruiterDetailedStatsDto?> GetEmployerDetailedStatsAsync(string userId, int days = 180)
+        {
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.OwnerUserId == userId);
+            if (company is null) return null;
+
+            var startDate = DateTime.UtcNow.AddDays(-days);
+
+            var applications = await _context.Applications
+                .Where(a => a.Job.CompanyId == company.Id && a.AppliedAt >= startDate)
+                .ToListAsync();
+
+            var result = new RecruiterDetailedStatsDto();
+
+            // 1. Performance Chart (Applications grouped by month)
+            // Group by Month/Year
+            var groupedApps = applications
+                .GroupBy(a => new { a.AppliedAt.Year, a.AppliedAt.Month })
+                .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+                .ToList();
+
+            foreach (var group in groupedApps)
+            {
+                result.PerformanceChart.Labels.Add($"Tháng {group.Key.Month}");
+                result.PerformanceChart.ApplicationsData.Add(group.Count());
+            }
+
+            // Ensure we have at least some labels if data is sparse
+            if (!result.PerformanceChart.Labels.Any())
+            {
+                result.PerformanceChart.Labels.Add($"Tháng {DateTime.UtcNow.Month}");
+                result.PerformanceChart.ApplicationsData.Add(0);
+            }
+
+            // 2. Status Chart
+            var statusCounts = applications
+                .GroupBy(a => a.Status)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            // Add all standard statuses to ensure chart consistency
+            string[] standardStatuses = { "Pending", "Interviewing", "Accepted", "Rejected" };
+            foreach (var status in standardStatuses)
+            {
+                result.StatusChart.Labels.Add(status);
+                result.StatusChart.Data.Add(statusCounts.GetValueOrDefault(status, 0));
+            }
+
+            // Add any other statuses not in the standard list
+            foreach (var kvp in statusCounts)
+            {
+                if (!standardStatuses.Contains(kvp.Key))
+                {
+                    result.StatusChart.Labels.Add(kvp.Key);
+                    result.StatusChart.Data.Add(kvp.Value);
+                }
+            }
+
+            return result;
+        }
+
         public async Task<bool> CreateJobAsync(CreateJobDto dto, string userId)
         {
             var company = await _context.Companies.FirstOrDefaultAsync(c => c.OwnerUserId == userId);

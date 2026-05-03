@@ -78,6 +78,20 @@ namespace job.Controllers
         }
 
         [Authorize(Roles = "Recruiter, recruiter, RECRUITER")]
+        [HttpGet("detailed-stats")]
+        public async Task<IActionResult> GetEmployerDetailedStats([FromQuery] int days = 180)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var stats = await _jobService.GetEmployerDetailedStatsAsync(userId, days);
+
+            if (stats is null)
+                return NotFound(ApiResponse<object>.FailureResponse("Company not found."));
+
+            return Ok(ApiResponse<RecruiterDetailedStatsDto>.SuccessResponse(stats));
+        }
+
+
+        [Authorize(Roles = "Recruiter, recruiter, RECRUITER")]
         [HttpPost]
         public async Task<IActionResult> PostJob([FromBody] CreateJobDto dto)
         {
