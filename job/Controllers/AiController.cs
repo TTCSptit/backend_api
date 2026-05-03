@@ -126,9 +126,11 @@ namespace job.Controllers
 
                     if (line.StartsWith("data: "))
                     {
-                        var data = line.Substring(6).Trim();
-                        if (data == "[DONE]") break;
-                        if (data == "---DATA---")
+                        var rawData = line.Substring(6);
+                        var dataTrimmed = rawData.Trim();
+                        
+                        if (dataTrimmed == "[DONE]") break;
+                        if (dataTrimmed == "---DATA---")
                         {
                             isReadingData = true;
                             continue;
@@ -137,13 +139,13 @@ namespace job.Controllers
                         if (isReadingData)
                         {
                             // Đây là JSON data cho dashboard
-                            aiDataJson = data;
+                            aiDataJson = rawData;
                             isReadingData = false;
                         }
                         else
                         {
-                            // Ghép text chunk
-                            var textChunk = data.Replace("\\n", "\n");
+                            // Ghép text chunk, giữ nguyên dấu cách
+                            var textChunk = rawData.Replace("\\n", "\n");
                             fullAiResponse.Append(textChunk);
                         }
                     }
