@@ -1,4 +1,4 @@
-﻿using Google.Apis.Auth;
+using Google.Apis.Auth;
 using job.Dtos;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics.Contracts;
@@ -11,5 +11,8 @@ namespace job.Services
     {
         Task<AuthResult> ExternalLoginAsync(GoogleJsonWebSignature.Payload payload, string role);
         Task<AuthResult> RegisterAsync(RegisterDto dto);
+        Task<AuthResult> ForgotPasswordAsync(string email);
+        Task<AuthResult> VerifyOtpAsync(string email, string otp);
+        Task<AuthResult> ResetPasswordAsync(ResetPasswordDto dto);
     }
 }

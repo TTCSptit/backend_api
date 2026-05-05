@@ -107,6 +107,31 @@ namespace job.Controllers
 
             return Ok(ApiResponse<object>.SuccessResponse(result.Data, "Login successful"));
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
+        {
+            var result = await _authService.ForgotPasswordAsync(dto.Email);
+            if (result.Succeeded) return Ok(ApiResponse<object>.SuccessResponse(null, result.Message));
+            return result.Status == AuthResultStatus.NotFound ? NotFound(ApiResponse<object>.FailureResponse(result.Message)) : BadRequest(ApiResponse<object>.FailureResponse(result.Message));
+        }
+
+        [HttpPost("verify-otp")]
+        public async Task<IActionResult> VerifyOtp([FromBody] VerifyOtpDto dto)
+        {
+            var result = await _authService.VerifyOtpAsync(dto.Email, dto.Otp);
+            if (result.Succeeded) return Ok(ApiResponse<object>.SuccessResponse(null, result.Message));
+            return BadRequest(ApiResponse<object>.FailureResponse(result.Message));
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+        {
+            var result = await _authService.ResetPasswordAsync(dto);
+            if (result.Succeeded) return Ok(ApiResponse<object>.SuccessResponse(null, result.Message));
+            return BadRequest(ApiResponse<object>.FailureResponse(result.Message));
+        }
     }
+}
 
 }

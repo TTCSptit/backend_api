@@ -36,7 +36,8 @@ builder.Services.AddDbContext<JobPtitContext>(op =>
 });
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
-    .AddEntityFrameworkStores<JobPtitContext>();
+    .AddEntityFrameworkStores<JobPtitContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -73,6 +74,8 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICompanyService, CompanyService>();
 builder.Services.AddScoped<IApplicationService, ApplicationService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddMemoryCache();
 builder.Services.AddHostedService<JobCleanupService>();
 
 builder.Services.AddSwaggerGen();
