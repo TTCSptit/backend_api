@@ -1,4 +1,4 @@
-﻿using job.Models;
+using job.Models;
 
 namespace job.Dtos
 {
@@ -17,5 +17,8 @@ namespace job.Dtos
         public string? LogoUrl { get; set; }
 
         public string? Description { get; set; }
+        public string? Industry { get; set; }
+        public string? Size { get; set; }
+        public string? Founded { get; set; }
     }
 }

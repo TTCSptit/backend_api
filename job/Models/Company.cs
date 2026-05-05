@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace job.Models;
@@ -20,6 +20,9 @@ public partial class Company
     public string? LogoUrl { get; set; }
 
     public string? Description { get; set; }
+    public string? Industry { get; set; }
+    public string? Size { get; set; }
+    public string? Founded { get; set; }
 
     public string OwnerUserId { get; set; } = null!;
 

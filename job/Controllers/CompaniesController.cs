@@ -59,5 +59,20 @@ namespace job.Controllers
 
             return NotFound(ApiResponse<object>.FailureResponse("Company not found or you do not have permission."));
         }
+
+        [Authorize(Roles = "recruiter, Recruiter, RECRUITER")]
+        [HttpPost("{id:int}/upload-logo")]
+        public async Task<IActionResult> UploadLogo(int id, IFormFile logo)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId)) return Unauthorized();
+
+            var logoUrl = await _companyService.UploadLogoAsync(id, currentUserId, logo);
+
+            if (logoUrl is not null)
+                return Ok(ApiResponse<string>.SuccessResponse(logoUrl));
+
+            return BadRequest(ApiResponse<object>.FailureResponse("Failed to upload logo."));
+        }
     }
 }

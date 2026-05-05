@@ -1,4 +1,4 @@
-﻿using job.Models;
+using job.Models;
 using System;
 using System.Collections.Generic;
 
@@ -23,6 +23,9 @@ public partial class CompanyDetailDto
     public string? Description { get; set; }
 
     public string OwnerUserId { get; set; } = null!;
+    public string? Industry { get; set; }
+    public string? Size { get; set; }
+    public string? Founded { get; set; }
 
     public bool IsVerified { get; set; }
 }

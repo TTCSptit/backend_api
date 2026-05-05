@@ -31,6 +31,9 @@ namespace job.Services
                 LogoUrl = existingCompany.LogoUrl,
                 Description = existingCompany.Description,
                 IsVerified = existingCompany.IsVerified,
+                Industry = existingCompany.Industry,
+                Size = existingCompany.Size,
+                Founded = existingCompany.Founded
             };
         }
 
@@ -52,6 +55,9 @@ namespace job.Services
                 LogoUrl = company.LogoUrl,
                 Description = company.Description,
                 IsVerified = company.IsVerified,
+                Industry = company.Industry,
+                Size = company.Size,
+                Founded = company.Founded
             };
         }
 
@@ -69,6 +75,9 @@ namespace job.Services
             existingCompany.PhoneNumber = dto.PhoneNumber;
             existingCompany.LogoUrl = dto.LogoUrl;
             existingCompany.Description = dto.Description;
+            existingCompany.Industry = dto.Industry;
+            existingCompany.Size = dto.Size;
+            existingCompany.Founded = dto.Founded;
 
             try
             {
@@ -79,6 +88,44 @@ namespace job.Services
             catch (Exception)
             {
                 return false;
+            }
+        }
+
+        public async Task<string?> UploadLogoAsync(int id, string userId, IFormFile logo)
+        {
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == id && c.OwnerUserId == userId);
+            if (company == null) return null;
+
+            string rootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "logos");
+            if (!Directory.Exists(rootPath)) Directory.CreateDirectory(rootPath);
+
+            string fileExtension = Path.GetExtension(logo.FileName);
+            string newFileName = $"logo-{id}-{DateTime.Now:yyyyMMddHHmmss}{fileExtension}";
+            string filePath = Path.Combine(rootPath, newFileName);
+
+            try
+            {
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await logo.CopyToAsync(stream);
+                }
+
+                // Delete old logo if it was local
+                if (!string.IsNullOrEmpty(company.LogoUrl) && company.LogoUrl.Contains("/uploads/logos/"))
+                {
+                    string oldFileName = Path.GetFileName(company.LogoUrl);
+                    string oldFilePath = Path.Combine(rootPath, oldFileName);
+                    if (File.Exists(oldFilePath)) File.Delete(oldFilePath);
+                }
+
+                string logoUrl = $"/uploads/logos/{newFileName}";
+                company.LogoUrl = logoUrl;
+                await _context.SaveChangesAsync();
+                return logoUrl;
+            }
+            catch (Exception)
+            {
+                return null;
             }
         }
     }
