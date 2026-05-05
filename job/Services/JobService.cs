@@ -310,7 +310,8 @@ namespace job.Services
                 JobType = dto.JobType,
                 CategoryId = dto.CategoryId,
                 ExpiredAt = dto.ExpiredAt,
-                CompanyId = company.Id
+                CompanyId = company.Id,
+                Status = 1
             };
 
             await _context.Jobs.AddAsync(newJob);
