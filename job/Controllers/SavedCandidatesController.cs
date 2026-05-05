@@ -40,7 +40,8 @@ public class SavedCandidatesController : ControllerBase
                 SavedAt = sc.SavedAt,
                 Note = sc.Note,
                 Role = "Ứng viên từ hệ thống",
-                Location = sc.Candidate.CandidateProfile != null ? sc.Candidate.CandidateProfile.Location : "Chưa cập nhật"
+                Location = sc.Candidate.CandidateProfile != null ? sc.Candidate.CandidateProfile.Location : "Chưa cập nhật",
+                CvUrl = sc.Candidate.CandidateProfile != null ? sc.Candidate.CandidateProfile.Cvurl : null
             })
             .ToListAsync();
 

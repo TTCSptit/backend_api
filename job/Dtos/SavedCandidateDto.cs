@@ -12,6 +12,7 @@ public class SavedCandidateDto
     public string? Note { get; set; }
     public string? Role { get; set; }
     public string? Location { get; set; }
+    public string? CvUrl { get; set; }
 }
 
 public class CreateSavedCandidateDto

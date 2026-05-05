@@ -140,4 +140,18 @@ public class ResumesController : ControllerBase
         var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
         return File(bytes, "application/octet-stream", resume.FileName);
     }
+
+    [HttpGet("download-by-filename/{fileName}")]
+    public async Task<IActionResult> DownloadByFileName(string fileName)
+    {
+        // Kiểm tra quyền hạn có thể thêm ở đây
+        var filePath = Path.Combine(_resumeFolder, fileName);
+        if (!System.IO.File.Exists(filePath)) return NotFound();
+
+        var resume = await _context.UserResumes.FirstOrDefaultAsync(r => r.FilePath == fileName);
+        var originalFileName = resume?.FileName ?? fileName;
+
+        var bytes = await System.IO.File.ReadAllBytesAsync(filePath);
+        return File(bytes, "application/octet-stream", originalFileName);
+    }
 }
