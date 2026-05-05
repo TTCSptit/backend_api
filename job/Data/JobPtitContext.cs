@@ -143,6 +143,21 @@ public partial class JobPtitContext : IdentityDbContext<ApplicationUser>
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.UserId);
         });
+
+        builder.Entity<SavedCandidate>(entity =>
+        {
+            entity.ToTable("SavedCandidates");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Recruiter)
+                  .WithMany()
+                  .HasForeignKey(e => e.RecruiterId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Candidate)
+                  .WithMany()
+                  .HasForeignKey(e => e.CandidateId)
+                  .OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(e => new { e.RecruiterId, e.CandidateId }).IsUnique();
+        });
     }
 
     public virtual DbSet<Application> Applications { get; set; }
@@ -159,4 +174,5 @@ public partial class JobPtitContext : IdentityDbContext<ApplicationUser>
     public virtual DbSet<ChatSession> ChatSessions { get; set; }
     public virtual DbSet<AiChatSession> AiChatSessions { get; set; }
     public virtual DbSet<UserResume> UserResumes { get; set; }
+    public virtual DbSet<SavedCandidate> SavedCandidates { get; set; }
 }
