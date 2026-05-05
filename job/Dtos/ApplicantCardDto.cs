@@ -12,6 +12,7 @@ namespace job.Dtos
         public DateTime AppliedAt { get; set; }
 
         public string FullName { get; set; }
+        public string? Email { get; set; }
 
         public string? Phone { get; set; }
 
@@ -26,7 +27,5 @@ namespace job.Dtos
         public  List<Education> Educations { get; set; } = new List<Education>();
 
         public  List<WorkExperience> WorkExperiences { get; set; } = new List<WorkExperience>();
-
-
     }
 }

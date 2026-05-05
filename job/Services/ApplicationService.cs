@@ -67,6 +67,7 @@ namespace job.Services
                     Status = a.Status,
                     AppliedAt = a.AppliedAt,
                     FullName = a.User.CandidateProfile != null ? a.User.CandidateProfile.FullName : (a.User.FullName ?? "N/A"),
+                    Email = a.User.CandidateProfile != null ? a.User.CandidateProfile.Email : a.User.Email,
                     Phone = a.User.CandidateProfile != null ? a.User.CandidateProfile.Phone : null,
                     Location = a.User.CandidateProfile != null ? a.User.CandidateProfile.Location : null,
                     AboutMe = a.User.CandidateProfile != null ? a.User.CandidateProfile.AboutMe : null,
