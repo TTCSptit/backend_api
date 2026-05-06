@@ -1,4 +1,4 @@
-﻿namespace job.Dtos
+namespace job.Dtos
 {
     public enum AuthResultStatus
     {
@@ -17,8 +17,8 @@
         public object? Data { get; set; }
         public AuthResultStatus Status { get; set; }
 
-        public static AuthResult Ok(object data) =>
-            new() { Succeeded = true, Status = AuthResultStatus.Success, Data = data };
+        public static AuthResult Ok(object? data, string? message = null) =>
+            new() { Succeeded = true, Status = AuthResultStatus.Success, Data = data, Message = message };
 
         public static AuthResult Error(AuthResultStatus status, string message) =>
             new() { Succeeded = false, Status = status, Message = message };
