@@ -138,9 +138,8 @@ namespace job.Controllers
 
                         if (isReadingData)
                         {
-                            // Đây là JSON data cho dashboard
-                            aiDataJson = rawData;
-                            isReadingData = false;
+                            // Gom tất cả các dòng dữ liệu AI cho đến khi [DONE]
+                            aiDataJson += rawData;
                         }
                         else
                         {
