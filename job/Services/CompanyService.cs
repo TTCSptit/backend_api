@@ -2,6 +2,7 @@ using job.Data;
 using job.Dtos;
 using job.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace job.Services
 {
@@ -33,7 +34,10 @@ namespace job.Services
                 IsVerified = existingCompany.IsVerified,
                 Industry = existingCompany.Industry,
                 Size = existingCompany.Size,
-                Founded = existingCompany.Founded
+                Founded = existingCompany.Founded,
+                Benefits = string.IsNullOrEmpty(existingCompany.Benefits) 
+                    ? new List<string>() 
+                    : JsonSerializer.Deserialize<List<string>>(existingCompany.Benefits)
             };
         }
 
@@ -57,7 +61,10 @@ namespace job.Services
                 IsVerified = company.IsVerified,
                 Industry = company.Industry,
                 Size = company.Size,
-                Founded = company.Founded
+                Founded = company.Founded,
+                Benefits = string.IsNullOrEmpty(company.Benefits) 
+                    ? new List<string>() 
+                    : JsonSerializer.Deserialize<List<string>>(company.Benefits)
             };
         }
 
@@ -78,15 +85,18 @@ namespace job.Services
             existingCompany.Industry = dto.Industry;
             existingCompany.Size = dto.Size;
             existingCompany.Founded = dto.Founded;
+            existingCompany.Benefits = dto.Benefits != null 
+                ? JsonSerializer.Serialize(dto.Benefits) 
+                : null;
 
             try
             {
-                int ret = await _context.SaveChangesAsync();
-
-                return ret > 0;
+                await _context.SaveChangesAsync();
+                return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Console.WriteLine($"Error updating company: {ex.Message}");
                 return false;
             }
         }

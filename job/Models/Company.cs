@@ -23,6 +23,7 @@ public partial class Company
     public string? Industry { get; set; }
     public string? Size { get; set; }
     public string? Founded { get; set; }
+    public string? Benefits { get; set; }
 
     public string OwnerUserId { get; set; } = null!;
 

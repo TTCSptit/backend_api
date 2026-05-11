@@ -26,6 +26,7 @@ public partial class CompanyDetailDto
     public string? Industry { get; set; }
     public string? Size { get; set; }
     public string? Founded { get; set; }
+    public List<string>? Benefits { get; set; }
 
     public bool IsVerified { get; set; }
 }
