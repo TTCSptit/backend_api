@@ -88,7 +88,8 @@ namespace job.Services
                     Location = j.Location,
                     SalaryMin = j.SalaryMin,
                     SalaryMax = j.SalaryMax,
-                    ExpiredAt = j.ExpiredAt
+                    ExpiredAt = j.ExpiredAt,
+                    RecruiterId = j.Company.OwnerUserId
                 })
                 .ToListAsync();
 
@@ -125,7 +126,8 @@ namespace job.Services
                 CategoryId = job.CategoryId,
                 JobType = job.JobType,
                 IsNegotiable = job.IsNegotiable,
-                ExpiredAt = job.ExpiredAt
+                ExpiredAt = job.ExpiredAt,
+                RecruiterId = job.Company.OwnerUserId
             };
         }
 
@@ -146,7 +148,8 @@ namespace job.Services
                     Location = j.Location,
                     SalaryMin = j.SalaryMin,
                     SalaryMax = j.SalaryMax,
-                    ExpiredAt = j.ExpiredAt
+                    ExpiredAt = j.ExpiredAt,
+                    RecruiterId = j.Company.OwnerUserId
                 })
                 .ToListAsync();
         }

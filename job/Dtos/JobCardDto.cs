@@ -27,5 +27,6 @@ namespace job.Dtos
         public bool IsNegotiable { get; set; }
 
         public DateTime? ExpiredAt { get; set; }
+        public string? RecruiterId { get; set; }
     }
 }

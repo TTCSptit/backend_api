@@ -115,7 +115,8 @@ namespace job.Services
                     SalaryMax = a.Job.SalaryMax,
                     JobType = a.Job.JobType,
                     IsNegotiable = a.Job.IsNegotiable,
-                    ExpiredAt = a.Job.ExpiredAt
+                    ExpiredAt = a.Job.ExpiredAt,
+                    RecruiterId = a.Job.Company.OwnerUserId
                 },
                 Status = a.Status,
                 AppliedAt = a.AppliedAt
