@@ -88,19 +88,31 @@ if (app.Environment.IsDevelopment())
 }
 
 // Seed Roles & Auto Migration
+// Seed Roles & Auto Migration
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<JobPtitContext>();
-    await context.Database.MigrateAsync();
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var roles = new[] { "Candidate", "Recruiter" };
-    foreach (var role in roles)
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    try
     {
-        if (!await roleManager.RoleExistsAsync(role))
+        var context = services.GetRequiredService<JobPtitContext>();
+        logger.LogInformation("Attempting to run database migrations...");
+        await context.Database.MigrateAsync();
+        logger.LogInformation("Database migrations applied successfully.");
+
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var roles = new[] { "Candidate", "Recruiter" };
+        foreach (var role in roles)
         {
-            await roleManager.CreateAsync(new IdentityRole(role));
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
         }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while migrating the database. The app will continue to start, but DB-related features may fail.");
     }
 }
 
