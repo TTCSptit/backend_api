@@ -72,7 +72,7 @@ namespace job.Controllers
         }
         [Authorize(Roles = "candidate, Candidate, CANDIDATE")]
         [HttpPost("upload-avatar")]
-        public async Task<IActionResult> UploadAvatar(IFormFile avatar)
+        public async Task<IActionResult> UploadAvatar([FromForm] IFormFile avatar)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var avatarUrl = await _profileService.UploadAvatarAsync(userId, avatar);
