@@ -14,10 +14,12 @@ namespace job.Controllers
     public class MessagesController : ControllerBase
     {
         private readonly JobPtitContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public MessagesController(JobPtitContext context)
+        public MessagesController(JobPtitContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         [HttpGet("conversations")]
@@ -78,6 +80,8 @@ namespace job.Controllers
                           SenderName = u.FullName ?? u.UserName ?? "Người dùng",
                           ReceiverId = m.ReceiverId,
                           Message = m.Message,
+                          AttachmentUrl = m.AttachmentUrl,
+                          AttachmentType = m.AttachmentType,
                           Timestamp = m.Timestamp,
                           IsRead = m.IsRead
                       })
@@ -107,7 +111,6 @@ namespace job.Controllers
             _context.ChatMessages.Add(newMessage);
             await _context.SaveChangesAsync();
 
-            // Trả về DTO đầy đủ thay vì model thô
             var responseDto = new ChatMessageDto
             {
                 Id = newMessage.Id,
@@ -116,6 +119,60 @@ namespace job.Controllers
                 SenderName = sender.FullName ?? sender.UserName ?? "Người dùng",
                 ReceiverId = newMessage.ReceiverId,
                 Message = newMessage.Message,
+                Timestamp = newMessage.Timestamp,
+                IsRead = newMessage.IsRead
+            };
+
+            return Ok(ApiResponse<ChatMessageDto>.SuccessResponse(responseDto));
+        }
+
+        [HttpPost("send-attachment")]
+        public async Task<IActionResult> SendAttachment([FromForm] string receiverId, [FromForm] string? message, [FromForm] IFormFile file, [FromForm] string type)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var sender = await _context.Users.FindAsync(userId);
+            if (sender == null) return Unauthorized();
+
+            string wwwRootPath = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var uploadsFolder = Path.Combine(wwwRootPath, "uploads", "messages");
+            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var attachmentUrl = $"/uploads/messages/{fileName}";
+
+            var newMessage = new ChatMessage
+            {
+                SenderId = userId,
+                ReceiverId = receiverId,
+                Message = message ?? string.Empty,
+                AttachmentUrl = attachmentUrl,
+                AttachmentType = type,
+                Timestamp = DateTime.UtcNow,
+                IsRead = false
+            };
+
+            _context.ChatMessages.Add(newMessage);
+            await _context.SaveChangesAsync();
+
+            var responseDto = new ChatMessageDto
+            {
+                Id = newMessage.Id,
+                SenderId = newMessage.SenderId,
+                SenderEmail = sender.Email ?? string.Empty,
+                SenderName = sender.FullName ?? sender.UserName ?? "Người dùng",
+                ReceiverId = newMessage.ReceiverId,
+                Message = newMessage.Message,
+                AttachmentUrl = newMessage.AttachmentUrl,
+                AttachmentType = newMessage.AttachmentType,
                 Timestamp = newMessage.Timestamp,
                 IsRead = newMessage.IsRead
             };
