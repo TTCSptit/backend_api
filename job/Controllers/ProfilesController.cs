@@ -1,4 +1,4 @@
-﻿using job.Dtos;
+using job.Dtos;
 using job.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -69,6 +69,18 @@ namespace job.Controllers
             if (cv == null)
                 return NotFound(ApiResponse<string>.FailureResponse("CV not found."));
             return File(cv.Data, cv.ContentType, cv.FileName);
+        }
+        [Authorize(Roles = "candidate, Candidate, CANDIDATE")]
+        [HttpPost("upload-avatar")]
+        public async Task<IActionResult> UploadAvatar(IFormFile avatar)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var avatarUrl = await _profileService.UploadAvatarAsync(userId, avatar);
+
+            if (avatarUrl != null)
+                return Ok(ApiResponse<string>.SuccessResponse(avatarUrl));
+
+            return BadRequest(ApiResponse<string>.FailureResponse("Failed to upload avatar."));
         }
     }
 }

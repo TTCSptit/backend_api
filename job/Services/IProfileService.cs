@@ -1,4 +1,4 @@
-﻿using job.Dtos;
+using job.Dtos;
 using job.Models;
 
 namespace job.Services
@@ -9,5 +9,6 @@ namespace job.Services
         Task<ProfileDto?> GetProfileByUserIdAsync(string userId);
         Task<bool> UpdateProfileAsync(string userId, UpdateProfileDto dto);
         Task<bool> UploadCvAsync(string userId, IFormFile cv);
+        Task<string?> UploadAvatarAsync(string userId, IFormFile avatar);
     }
 }

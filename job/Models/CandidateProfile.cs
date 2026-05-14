@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace job.Models;
@@ -20,6 +20,7 @@ public partial class CandidateProfile
     public string? AboutMe { get; set; }
 
     public string? Cvurl { get; set; }
+    public string? AvatarUrl { get; set; }
 
     public virtual ICollection<Education> Educations { get; set; } = new List<Education>();
 

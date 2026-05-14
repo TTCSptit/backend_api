@@ -1,4 +1,4 @@
-﻿using job.Data;
+using job.Data;
 using job.Dtos;
 using job.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -63,6 +63,7 @@ namespace job.Services
                 Location = profile.Location,
                 AboutMe = profile.AboutMe,
                 Cvurl = profile.Cvurl,
+                AvatarUrl = profile.AvatarUrl,
                 Educations = profile.Educations.Select(e => new EducationDto
                 {
                     Id = e.Id,
@@ -240,5 +241,33 @@ namespace job.Services
         }
 
 
+        public async Task<string?> UploadAvatarAsync(string userId, IFormFile avatar)
+        {
+            var profile = await _context.CandidateProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
+            if (profile == null) return null;
+
+            // Delete old avatar if exists
+            if (!string.IsNullOrEmpty(profile.AvatarUrl))
+            {
+                var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.AvatarUrl.TrimStart('/'));
+                if (File.Exists(oldPath)) File.Delete(oldPath);
+            }
+
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
+            if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(avatar.FileName)}";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await avatar.CopyToAsync(stream);
+            }
+
+            profile.AvatarUrl = $"/uploads/avatars/{fileName}";
+            await _context.SaveChangesAsync();
+
+            return profile.AvatarUrl;
+        }
     }
 }

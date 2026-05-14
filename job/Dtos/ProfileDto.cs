@@ -1,4 +1,4 @@
-﻿using job.Models;
+using job.Models;
 
 namespace job.Dtos
 {
@@ -17,6 +17,7 @@ namespace job.Dtos
         public string? AboutMe { get; set; }
 
         public string? Cvurl { get; set; }
+        public string? AvatarUrl { get; set; }
 
         public List<EducationDto> Educations { get; set; } = new List<EducationDto>();
 
