@@ -9,10 +9,12 @@ namespace job.Services
     public class CompanyService : ICompanyService
     {
         private readonly JobPtitContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public CompanyService(JobPtitContext context)
+        public CompanyService(JobPtitContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         public async Task<CompanyDetailDto?> GetCompanyAsync(int id)
@@ -106,7 +108,13 @@ namespace job.Services
             var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == id && c.OwnerUserId == userId);
             if (company == null) return null;
 
-            string rootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "logos");
+            string wwwRootPath = _environment.WebRootPath;
+            if (string.IsNullOrEmpty(wwwRootPath))
+            {
+                wwwRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            }
+
+            string rootPath = Path.Combine(wwwRootPath, "uploads", "logos");
             if (!Directory.Exists(rootPath)) Directory.CreateDirectory(rootPath);
 
             string fileExtension = Path.GetExtension(logo.FileName);

@@ -13,10 +13,12 @@ namespace job.Services
     public class ProfileService : IProfileService
     {
         private readonly JobPtitContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public ProfileService(JobPtitContext context)
+        public ProfileService(JobPtitContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         public async Task<FileResult?> GetCvAsync(string? userId)
@@ -195,7 +197,7 @@ namespace job.Services
 
             if (profile.Cvurl != null)
             {
-                var existingCvFile = Path.Combine(Directory.GetCurrentDirectory(), "Resumes", profile.Cvurl);
+                var existingCvFile = Path.Combine(_environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "Resumes", profile.Cvurl);
 
                 if (File.Exists(existingCvFile))
                 {
@@ -203,7 +205,7 @@ namespace job.Services
                 }
             }
 
-            string rootPath = Path.Combine(Directory.GetCurrentDirectory(), "Resumes");
+            string rootPath = Path.Combine(_environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "Resumes");
 
             if (!Directory.Exists(rootPath))
             {
@@ -246,14 +248,20 @@ namespace job.Services
             var profile = await _context.CandidateProfiles.FirstOrDefaultAsync(p => p.UserId == userId);
             if (profile == null) return null;
 
+            string wwwRootPath = _environment.WebRootPath;
+            if (string.IsNullOrEmpty(wwwRootPath))
+            {
+                wwwRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            }
+
             // Delete old avatar if exists
             if (!string.IsNullOrEmpty(profile.AvatarUrl))
             {
-                var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", profile.AvatarUrl.TrimStart('/'));
+                var oldPath = Path.Combine(wwwRootPath, profile.AvatarUrl.TrimStart('/'));
                 if (File.Exists(oldPath)) File.Delete(oldPath);
             }
 
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
+            var uploadsFolder = Path.Combine(wwwRootPath, "uploads", "avatars");
             if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
 
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(avatar.FileName)}";
