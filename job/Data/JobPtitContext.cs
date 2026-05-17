@@ -158,6 +158,13 @@ public partial class JobPtitContext : IdentityDbContext<ApplicationUser>
                   .OnDelete(DeleteBehavior.Restrict);
             entity.HasIndex(e => new { e.RecruiterId, e.CandidateId }).IsUnique();
         });
+
+        builder.Entity<InterviewReport>(entity =>
+        {
+            entity.ToTable("InterviewReports");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.RoomId).IsUnique();
+        });
     }
 
     public virtual DbSet<Application> Applications { get; set; }
@@ -175,4 +182,5 @@ public partial class JobPtitContext : IdentityDbContext<ApplicationUser>
     public virtual DbSet<AiChatSession> AiChatSessions { get; set; }
     public virtual DbSet<UserResume> UserResumes { get; set; }
     public virtual DbSet<SavedCandidate> SavedCandidates { get; set; }
+    public virtual DbSet<InterviewReport> InterviewReports { get; set; }
 }

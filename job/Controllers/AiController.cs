@@ -6,6 +6,7 @@ using job.Models;
 using System.Text;
 using System.Text.Json;
 using System.Net.WebSockets;
+using Microsoft.EntityFrameworkCore;
 
 namespace job.Controllers
 {
@@ -425,6 +426,74 @@ namespace job.Controllers
                 }
 
                 await destination.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
+            }
+        }
+
+        /// <summary>
+        /// POST api/Ai/interview/report
+        /// Lưu báo cáo phân tích phỏng vấn vào Database SQL Server
+        /// </summary>
+        [HttpPost("interview/report")]
+        public async Task<IActionResult> SaveInterviewReport([FromBody] InterviewReport reportDto)
+        {
+            if (reportDto == null || string.IsNullOrEmpty(reportDto.RoomId))
+                return BadRequest(new { error = "Dữ liệu báo cáo không hợp lệ." });
+
+            try
+            {
+                var existing = await _context.InterviewReports
+                    .FirstOrDefaultAsync(r => r.RoomId == reportDto.RoomId);
+
+                if (existing != null)
+                {
+                    // Cập nhật nếu đã tồn tại
+                    existing.CommunicationScore = reportDto.CommunicationScore;
+                    existing.TechnicalScore = reportDto.TechnicalScore;
+                    existing.ConfidenceScore = reportDto.ConfidenceScore;
+                    existing.FeedbackStrengths = reportDto.FeedbackStrengths;
+                    existing.FeedbackWeaknesses = reportDto.FeedbackWeaknesses;
+                    existing.TranscriptSummary = reportDto.TranscriptSummary;
+                    existing.CreatedAt = DateTime.UtcNow;
+                    _context.InterviewReports.Update(existing);
+                }
+                else
+                {
+                    // Thêm mới
+                    await _context.InterviewReports.AddAsync(reportDto);
+                }
+
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Lưu báo cáo phỏng vấn thành công!" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { error = "Lỗi khi lưu báo cáo: " + ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// GET api/Ai/interview/report/{roomId}
+        /// Lấy báo cáo phân tích phỏng vấn từ Database SQL Server
+        /// </summary>
+        [HttpGet("interview/report/{roomId}")]
+        public async Task<IActionResult> GetInterviewReport(string roomId)
+        {
+            if (string.IsNullOrEmpty(roomId))
+                return BadRequest(new { error = "Mã phòng không hợp lệ." });
+
+            try
+            {
+                var report = await _context.InterviewReports
+                    .FirstOrDefaultAsync(r => r.RoomId == roomId);
+
+                if (report == null)
+                    return NotFound(new { error = "Không tìm thấy báo cáo cho phòng này." });
+
+                return Ok(report);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new { error = "Lỗi khi lấy báo cáo: " + ex.Message });
             }
         }
     }
