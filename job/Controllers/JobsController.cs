@@ -30,6 +30,7 @@ namespace job.Controllers
         }
 
 
+        [AllowAnonymous]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetJob([FromRoute] int id)
         {
