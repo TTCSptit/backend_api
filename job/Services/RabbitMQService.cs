@@ -32,7 +32,7 @@ namespace job.Services
                 using var connection = factory.CreateConnection();
                 using var channel = connection.CreateModel();
 
-                channel.QueueDeclare(queue: "job_application_queue",
+                channel.QueueDeclare(queue: "background_tasks_queue",
                                      durable: true,
                                      exclusive: false,
                                      autoDelete: false,
@@ -57,7 +57,7 @@ namespace job.Services
                 properties.Persistent = true;
 
                 channel.BasicPublish(exchange: "",
-                                     routingKey: "job_application_queue",
+                                     routingKey: "background_tasks_queue",
                                      basicProperties: properties,
                                      body: body);
 
