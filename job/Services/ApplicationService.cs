@@ -164,5 +164,21 @@ namespace job.Services
                 return false;
             }
         }
+
+        public async Task<bool> DeleteApplicationAsync(int applicationId, string userId)
+        {
+            var application = await _context.Applications.FirstOrDefaultAsync(a => a.Id == applicationId && a.UserId == userId);
+            if (application == null) return false;
+
+            _context.Applications.Remove(application);
+            try
+            {
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
     }
 }

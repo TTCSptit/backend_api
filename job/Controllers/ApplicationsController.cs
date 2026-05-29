@@ -33,6 +33,20 @@ namespace job.Controllers
             return Ok(ApiResponse<IEnumerable<ApplicationCardDto>>.SuccessResponse(applications));
         }
 
+        [Authorize(Roles = "candidate, Candidate, CANDIDATE")]
+        [HttpDelete("{applicationId:int}")]
+        public async Task<IActionResult> DeleteApplication(int applicationId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var result = await _applicationService.DeleteApplicationAsync(applicationId, userId);
+
+            if (!result) return BadRequest(ApiResponse<object>.FailureResponse("Failed to withdraw application."));
+
+            return Ok(ApiResponse<object>.SuccessResponse(null, "Application withdrawn successfully."));
+        }
+
         [Authorize(Roles = "recruiter, Recruiter, RECRUITER")]
         [HttpGet("job/{jobId:int}")]
         public async Task<IActionResult> GetApplicants(int jobId)

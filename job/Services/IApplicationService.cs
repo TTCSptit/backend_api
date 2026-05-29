@@ -11,5 +11,6 @@ namespace job.Services
         Task<IEnumerable<ApplicationCardDto>?> GetSubmittedJobsAsync(string userId);
         Task<bool> UpdateStatus(UpdateApplicationStatusDto dto);
         Task<bool> UpdateAiScore(UpdateAiScoreDto dto);
+        Task<bool> DeleteApplicationAsync(int applicationId, string userId);
     }
 }
