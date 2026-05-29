@@ -158,6 +158,10 @@ CREATE TABLE [dbo].[Applications](
     [JobId] [int] NOT NULL,
     [Status] [nvarchar](50) NOT NULL,
     [AppliedAt] [datetime2](7) NULL DEFAULT (GETDATE()),
+    [AIScore] [int] NULL,
+    [AIStrengths] [nvarchar](max) NULL,
+    [AIWeaknesses] [nvarchar](max) NULL,
+    [AIReasoning] [nvarchar](max) NULL,
     CONSTRAINT [UQ_User_Job] UNIQUE ([UserId], [JobId])
 );
 

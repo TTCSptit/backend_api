@@ -10,10 +10,12 @@ namespace job.Services
     public class JobService : IJobService
     {
         private readonly JobPtitContext _context;
+        private readonly IRabbitMQService _rabbitMQService;
 
-        public JobService(JobPtitContext context)
+        public JobService(JobPtitContext context, IRabbitMQService rabbitMQService)
         {
             _context = context;
+            _rabbitMQService = rabbitMQService;
         }
 
         private IQueryable<Job> GetJobsAvailable()
@@ -191,7 +193,25 @@ namespace job.Services
 
             try
             {
-                return (await _context.SaveChangesAsync()) > 0;
+                var success = (await _context.SaveChangesAsync()) > 0;
+
+                if (success) 
+                {
+                    try 
+                    {
+                        var candidate = await _context.CandidateProfiles.FirstOrDefaultAsync(c => c.UserId == userId);
+                        if (candidate != null && !string.IsNullOrEmpty(candidate.Cvurl)) 
+                        {
+                            _rabbitMQService.PublishApplicantEvaluationTask(application.Id, userId, jobId, candidate.Cvurl);
+                        }
+                    } 
+                    catch 
+                    {
+                        // Ignore RabbitMQ errors to not break the application flow
+                    }
+                }
+
+                return success;
             }
             catch
             {

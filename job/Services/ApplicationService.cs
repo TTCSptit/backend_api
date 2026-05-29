@@ -73,6 +73,11 @@ namespace job.Services
                     AboutMe = a.User.CandidateProfile != null ? a.User.CandidateProfile.AboutMe : null,
                     Cvurl = a.User.CandidateProfile != null ? a.User.CandidateProfile.Cvurl : null,
                     
+                    AIScore = a.AIScore,
+                    AIStrengths = a.AIStrengths,
+                    AIWeaknesses = a.AIWeaknesses,
+                    AIReasoning = a.AIReasoning,
+                    
                     Skills = a.User.CandidateProfile != null 
                         ? a.User.CandidateProfile.Skills.Select(s => s.Name).ToList() 
                         : new List<string>(),
@@ -129,6 +134,26 @@ namespace job.Services
             if (existingApplication == null) return false;
 
             existingApplication.Status = dto.NewStatus;
+
+            try
+            {
+                return await _context.SaveChangesAsync() > 0;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateAiScore(UpdateAiScoreDto dto)
+        {
+            var existingApplication = await _context.Applications.FirstOrDefaultAsync(a => a.Id == dto.ApplicationId);
+            if (existingApplication == null) return false;
+
+            existingApplication.AIScore = dto.AIScore;
+            existingApplication.AIStrengths = dto.AIStrengths;
+            existingApplication.AIWeaknesses = dto.AIWeaknesses;
+            existingApplication.AIReasoning = dto.AIReasoning;
 
             try
             {

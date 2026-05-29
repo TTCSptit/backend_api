@@ -10,5 +10,6 @@ namespace job.Services
         Task<JobApplicantsDashboardDto?> GetJobApplicantsDashboardAsync(int jobId);
         Task<IEnumerable<ApplicationCardDto>?> GetSubmittedJobsAsync(string userId);
         Task<bool> UpdateStatus(UpdateApplicationStatusDto dto);
+        Task<bool> UpdateAiScore(UpdateAiScoreDto dto);
     }
 }

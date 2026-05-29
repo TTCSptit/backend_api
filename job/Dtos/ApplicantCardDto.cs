@@ -22,6 +22,11 @@ namespace job.Dtos
 
         public string? Cvurl { get; set; }
 
+        public int? AIScore { get; set; }
+        public string? AIStrengths { get; set; }
+        public string? AIWeaknesses { get; set; }
+        public string? AIReasoning { get; set; }
+
         public List<string> Skills { get; set; }
 
         public  List<Education> Educations { get; set; } = new List<Education>();

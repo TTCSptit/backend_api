@@ -145,3 +145,4 @@ D:\ttcs\backend_api\job\obj\Debug\net8.0\refint\job.dll
 D:\ttcs\backend_api\job\obj\Debug\net8.0\job.pdb
 D:\ttcs\backend_api\job\obj\Debug\net8.0\job.genruntimeconfig.cache
 D:\ttcs\backend_api\job\obj\Debug\net8.0\ref\job.dll
+D:\ttcs\backend_api\job\bin\Debug\net8.0\RabbitMQ.Client.dll

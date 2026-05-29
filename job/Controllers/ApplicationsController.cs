@@ -1,4 +1,4 @@
-﻿using job.Dtos;
+using job.Dtos;
 using job.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -55,6 +55,17 @@ namespace job.Controllers
                 return BadRequest(ApiResponse<object>.FailureResponse("Failed to update status."));
 
             return Ok(ApiResponse<object>.SuccessResponse(null, "Status updated successfully."));
+        }
+
+        [HttpPut("update-ai-score")]
+        public async Task<IActionResult> UpdateAiScore([FromBody] UpdateAiScoreDto dto)
+        {
+            var result = await _applicationService.UpdateAiScore(dto);
+
+            if (!result)
+                return BadRequest(ApiResponse<object>.FailureResponse("Failed to update AI score."));
+
+            return Ok(ApiResponse<object>.SuccessResponse(null, "AI Score updated successfully."));
         }
 
         [Authorize(Roles = "recruiter, Recruiter, RECRUITER")]
